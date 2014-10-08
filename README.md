@@ -24,6 +24,6 @@ pbots
 - Does the "score" say how many hands the match took? That's not a very good metric. 
 - % of games won over a large sample would be better
 - Note GNU parallel "bug" in Debian, where --tollef is default
-- To experiment I have been doing something like `seq 50 | parallel --gnu  java -classpath /home/nick/projects/pokerbot/theaigames/poker-engine/bin nl.starapple.backend.RunPoker 2000 "./multibot.py\ ExampleBot" "./multibot.py\ PairBot" 2> err2.txt 1> out2.txt` and then `egrep "Winner|Score" out.*.txt`
+- To experiment I have been doing something like `seq 50 | parallel --gnu  java -classpath /home/nick/projects/pokerbot/theaigames/poker-engine/bin nl.starapple.backend.RunPoker 2000 "./multibot.py\ ExampleBot" "./multibot.py\ PairBot" 2> err.txt 1> out.txt` and then `egrep "Winner|Score" out.txt`
 - Haven't decided how best for bot writers to compare their results without sharing code. % won against an agreed set of dumber bots?
 
