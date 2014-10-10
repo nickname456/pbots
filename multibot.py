@@ -258,15 +258,17 @@ class PairBot(Bot):
 
     # have to have at least one of the cards in your hand or you're playing the board
     def has_best_pair(self,cards,hand):
-        current_best=-1
-        for i in range(0,len(cards)):
-            for j in range(1,len(cards)):
-                if i!=j and cards[i].value==cards[j].value and cards[i].value > current_best:
-                    current_best = cards[i].value
+        board_values = [c.value for c in cards]
+        highest_board_value=max(board_values)
+        highest_nonboard_pair = -1
         for card in hand:
-            if card.value==current_best:
-                return True
+            if card.value in board_values:
+                highest_nonboard_pair = card.value
+        
+        if highest_nonboard_pair==highest_board_value:
+            return True
         return False
+    
     
     def has_pair(self,cards,hand):
         for card in hand:
@@ -313,12 +315,70 @@ class PairBot(Bot):
             return 'check 0' # might fold if there's a bet
 
 
+class RockBot(Bot):
+
+    def __init__(self):
+        self.has_raised_street = False
+        Bot.__init__(self)
+
+    # have to have at least one of the cards in your hand or you're playing the board
+    def has_best_pair(self,cards,hand):
+        board_values = [c.value for c in cards]
+        highest_board_value=max(board_values)
+        highest_nonboard_pair = -1
+        for card in hand:
+            if card.value in board_values:
+                highest_nonboard_pair = card.value
+        
+        if highest_nonboard_pair==highest_board_value:
+            return True
+        return False
+    
+    def update_match_info(self, options):
+        key, value = options
+        if key=="round":
+            self.has_raised_street = False
+            if 'table' in self.match_settings:
+                stderr.write('Removing runout from last hand\n')
+                del self.match_settings['table']
+        if key=="table":
+            self.has_raised_street = False
+        Bot.update_match_info(self,options)
+
+    def make_move(self, timeout):
+        
+        is_preflop = not 'table' in self.match_settings
+        board = []
+        if not is_preflop:
+            board = self.parse_cards(self.match_settings['table'])
+
+        if is_preflop:
+            has_all_high_cards = True
+            for card in self.bots['me']['pocket']:
+                if card.number < 8:
+                    has_all_high_cards = False
+            if has_all_high_cards:
+                if not self.has_raised_street:
+                    return "raise " + str(self.bots['me']['stack']) # pot
+                else:
+                    return "call " + (self.match_settings['amountToCall'])
+        else:
+            # FIXME: best hand, not best pair
+            if self.has_best_pair(self.bots['me']['pocket'].cards+board,\
+             self.bots['me']['pocket'].cards):
+                if not self.has_raised_street:
+                    return "raise " + str(self.bots['me']['stack']) # pot
+                else:
+                    return "call " + (self.match_settings['amountToCall'])
+        return 'check 0' # might fold if there's a bet
+
+
 if __name__ == '__main__':
     if len(sys.argv)==2:
         name = sys.argv[1]
-        botnames = ["ExampleBot","CallBot","AvgValuePotBot","PotBot","RandomBot","FoldBot","PairBot"]
+        botnames = ["ExampleBot","CallBot","AvgValuePotBot","PotBot","RandomBot","FoldBot","PairBot","RockBot"]
         if name in botnames:
-            botclasses = [ExampleBot,CallBot,AvgValuePotBot,PotBot,RandomBot,FoldBot,PairBot]
+            botclasses = [ExampleBot,CallBot,AvgValuePotBot,PotBot,RandomBot,FoldBot,PairBot,RockBot]
             c = botclasses[botnames.index(name)]
             c().run()
         else:
