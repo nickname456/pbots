@@ -174,15 +174,52 @@ def main():
                                     hand = poker.Hand(cards)
                                     if best_combo is None or hand > best_combo:
                                         best_combo = hand
+                # XXX: after the hand rank, unique card values in the hand 
                 print best_combo.cards,best_combo.rank
-                # TODO: Print human readable
-                # TODO: not sure about the "best" one i'm getting
-                # oh wait, it's fine
-                #*** RIVER *** [6s 5h 6c Qc] [8h]
-                #player1: shows [8d 9d 3d Qh] (TODO: evaluate)
-                #[8d, Qh, 6s, Qc, 8h] ['2', 10, 6, 4]
-                # last 3 numbers are Q, 8, kicker of 6, for sort order
-                print "%s: shows %s (TODO: evaluate)" % (bits[0],bits[2].replace(","," "))
+                hand_repr=""
+                r = best_combo.rank
+                if r[0]=='0':
+                    hand_repr = "%s, %ss" % (hand_names[r[0]],
+                                        value_names[r[1]])
+                elif r[0]=='1':
+                    hand_repr = "%s %ss" % (hand_names[r[0]],
+                                        value_names[r[1]])
+                elif r[0]=='2':
+                    hand_repr = "%s, %ss and %ss" % (hand_names[r[0]],
+                                        value_names[r[1]],
+                                        value_names[r[2]],)
+                elif r[0]=='3':
+                    # TODO: not validated against actual hh
+                    hand_repr = "%s, %ss" % (hand_names[r[0]],
+                                        value_names[r[1]])
+                elif r[0]=='4':
+                    # TODO: not validated against actual hh
+                    hand_repr = "%s, %s high" % (hand_names[r[0]],
+                                        value_names[r[1]])
+                elif r[0]=='5':
+                    # TODO: not validated against actual hh
+                    hand_repr = "%s, %s high" % (hand_names[r[0]],
+                                        value_names[r[1]])
+                elif r[0]=='6':
+                    # TODO: not validated against actual hh
+                    hand_repr = "%s, %ss over %ss" % (hand_names[r[0]],
+                                        value_names[r[1]],
+                                        value_names[r[2]],)
+                elif r[0]=='7':
+                    # TODO: not validated against actual hh
+                    hand_repr = "%s, %ss" % (hand_names[r[0]],
+                                        value_names[r[1]])
+                elif r[0]=='8':
+                    # TODO: not validated against actual hh
+                    hand_repr = "%s, %s high" % (hand_names[r[0]],
+                                        value_names[r[1]])
+                elif r[0]=='9':
+                    # TODO: not validated against actual hh
+                    hand_repr = "%s" % (hand_names[r[0]],)
+                else:
+                    print r
+                    assert False
+                print "%s: shows %s (%s)" % (bits[0],bits[2].replace(","," "),hand_repr)
 
         elif bits[1]=='call':
             # player2 call 10
