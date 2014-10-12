@@ -46,6 +46,7 @@ def main():
     p2_in_pot = 0
     amount_to_call=0 # from start of street
     current_bet = 0
+    hole_cards_done = False # assuming we see 1 player'scards per dump
     
 
     for line in sys.stdin:
@@ -54,6 +55,7 @@ def main():
             data = bits[2]
             if bits[1]=='round':
                 hand_no = data
+                hole_cards_done = False
             elif bits[1]=='smallBlind':
                 sb = data
             elif bits[1]=='bigBlind':
@@ -130,18 +132,21 @@ def main():
         elif bits[1]=='finished':
             continue
         elif bits[1]=='hand':
-            # FIXME: get these messages at showdown too
             # Phontaz: shows [9s 9h] (two pair, Nines and Deuces)
             # ElT007: shows [Qd Qc] (two pair, Queens and Deuces)
-
-            print "*** HOLE CARDS ***" # XXX: assuming only get 1 player'shand per dump
-            if bits[0]=='player1':
-                print "Dealt to player1",bits[2]
-            elif bits[0]=='player2':
-                print "Dealt to player2",bits[2]
+            if not hole_cards_done:
+                print "*** HOLE CARDS ***" # XXX: assuming only get 1 player'shand per dump
+                if bits[0]=='player1':
+                    print "Dealt to player1",bits[2].replace(","," ")
+                elif bits[0]=='player2':
+                    print "Dealt to player2",bits[2].replace(","," ")
+                else:
+                    print line
+                    assert False
+                hole_cards_done = True
             else:
-                print line
-                assert False
+                # TODO: showdown valuation
+                print "%s: shows %s (TODO: evaluate)" % (bits[0],bits[2].replace(","," "))
         elif bits[1]=='call':
             # player2 call 10
             # kovilen007: calls 8293 and is all-in
@@ -203,6 +208,9 @@ def main():
             assert p2_in_pot <= p2_chips
         elif bits[1]=='wins':
             # TODO need to eval hands, what happens if not all pot won
+            # uncalled bets...
+            # TODO: exmaple bot has hand ranker... quite nice too. for 5 cards
+            #
             # player1 wins 40
             #
             # ElT007 collected 11018 from side pot-2
@@ -214,7 +222,7 @@ def main():
         else:
             print line
             assert False
-
+# read https://github.com/HHSmithy/PokerHandHistoryParser/blob/master/HandHistories.Parser/Parsers/FastParser/PokerStars/PokerStarsFastParserImpl.cs http://poker.readthedocs.org/en/latest/handhistory.html
 # cat poker-engine/out.txt| python pbots/aig_to_ps.py 
 if __name__=='__main__':
     main()
