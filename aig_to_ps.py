@@ -44,7 +44,9 @@ def main():
     p2_chips = -1
     p1_in_pot = 0
     p2_in_pot = 0
-    amount_to_call=0
+    amount_to_call=0 # from start of street
+    current_bet = 0
+    
 
     for line in sys.stdin:
         bits = line.strip().split(" ")
@@ -75,14 +77,23 @@ def main():
             elif bits[1]=='maxWinPot':
                 continue
             elif bits[1]=='amountToCall':
-                amount_to_call = bits[2]
+                amount_to_call = int(bits[2])
+                current_bet = amount_to_call*2 # sb preflop, 0 postflop streets
             elif bits[1]=='table':
-                # TODO: 
                 # Match table [Kd,Tc,6c]
                 # *** FLOP *** [2d 2c 3c]
                 # *** TURN *** [2d 2c 3c] [8h]
                 # *** RIVER *** [2d 2c 3c 8h] [4d]
-                continue
+                cards = bits[2][1:-1].split(",")
+                if len(cards)==3:
+                    print "*** FLOP *** [%s %s %s]" % (cards[0],cards[1],cards[2])
+                elif len(cards)==4:
+                    print "*** TURN *** [%s %s %s] [%s]" % (cards[0],cards[1],cards[2],cards[3])
+                elif len(cards)==5:
+                    print "*** RIVER *** [%s %s %s %s] [%s]" % (cards[0],cards[1],cards[2],cards[3],cards[4])
+                else:
+                    print line
+                    assert False
             else:
                 print line
                 assert False
@@ -169,24 +180,25 @@ def main():
             # verified this for only one example
             suffix = ""
             if bits[0]=='player1':
-                p1_in_pot += int(bits[2]) + int(amount_to_call)
+                p1_in_pot += int(bits[2]) + amount_to_call
+                current_bet += int(bits[2])
                 if p1_in_pot==p1_chips:
                     suffix=" and is all-in"
             elif bits[0]=='player2':
-                p2_in_pot += int(bits[2]) + int(amount_to_call)
+                p2_in_pot += int(bits[2]) + amount_to_call
+                current_bet += int(bits[2])
                 if p2_in_pot==p2_chips:
                     suffix=" and is all-in"
             else:
                 print line
                 assert False
 
-            if amount_to_call=="0":
-                # XXX: bet. have no example
+            if amount_to_call==0:
+                # FIXME: bet. have no example
                 print "%s: bets %s%s" % (bits[0],bits[2],suffix)
             else:
                 # raise
-                total = 0 # TODO: track
-                print "%s: raises %s to %d%s" % (bits[0],bits[2],total,suffix)
+                print "%s: raises %s to %d%s" % (bits[0],bits[2],current_bet,suffix)
             assert p1_in_pot <= p1_chips
             assert p2_in_pot <= p2_chips
         elif bits[1]=='wins':
