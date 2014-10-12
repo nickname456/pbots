@@ -1,5 +1,6 @@
 # convert aigames hand history to ps hand history, for visualisation
 import sys
+import poker
 
 def print_stacks(s1,s2):
     print "Seat 1: player1 (%d in chips)" % (s1,)
@@ -47,7 +48,7 @@ def main():
     amount_to_call=0 # from start of street
     current_bet = 0
     hole_cards_done = False # assuming we see 1 player'scards per dump
-    
+    full_board = None  # XXX: Do we only print eval on river, or for eg say they have 2 pair on the flop if we're all in?
 
     for line in sys.stdin:
         bits = line.strip().split(" ")
@@ -93,6 +94,7 @@ def main():
                     print "*** TURN *** [%s %s %s] [%s]" % (cards[0],cards[1],cards[2],cards[3])
                 elif len(cards)==5:
                     print "*** RIVER *** [%s %s %s %s] [%s]" % (cards[0],cards[1],cards[2],cards[3],cards[4])
+                    full_board = cards
                 else:
                     print line
                     assert False
@@ -145,8 +147,29 @@ def main():
                     assert False
                 hole_cards_done = True
             else:
-                # TODO: showdown valuation
                 print "%s: shows %s (TODO: evaluate)" % (bits[0],bits[2].replace(","," "))
+                hole_cards = bits[2][1:-1].split(",")
+                best_combo = None
+                for i in range(0,4):
+                    for j in range(i+1,4):
+                        c1,c2 = hole_cards[i],hole_cards[j]
+                        for b1 in range(0,5):
+                            for b2 in range(b1+1,5):
+                                for b3 in range(b2+1,5):
+                                    c3,c4,c5 = full_board[b1],full_board[b2],full_board[b3]
+                                    cards = [poker.Card(c[1],c[0]) for c in [c1,c2,c3,c4,c5]]
+                                    hand = poker.Hand(cards)
+                                    if best_combo is None or hand > best_combo:
+                                        best_combo = hand
+                print best_combo.cards,best_combo.rank
+                # TODO: showdown valuation
+                # TODO: not sure about the "best" one i'm getting
+                # oh wait, it's fine
+                #*** RIVER *** [6s 5h 6c Qc] [8h]
+                #player1: shows [8d 9d 3d Qh] (TODO: evaluate)
+                #[8d, Qh, 6s, Qc, 8h] ['2', 10, 6, 4]
+                # last 3 numbers are Q, 8, kicker of 6, for sort order
+
         elif bits[1]=='call':
             # player2 call 10
             # kovilen007: calls 8293 and is all-in
