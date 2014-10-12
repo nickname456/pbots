@@ -2,8 +2,8 @@
 import sys
 
 def print_stacks(s1,s2):
-    print "Seat 1: player1 (%s in chips)" % (s1,)
-    print "Seat 2: player2 (%s in chips)" % (s2,)
+    print "Seat 1: player1 (%d in chips)" % (s1,)
+    print "Seat 2: player2 (%d in chips)" % (s2,)
 
 # http://code.activestate.com/recipes/81611-roman-numerals/
 # PSF licence (http://opensource.org/licenses/Python-2.0)
@@ -42,11 +42,10 @@ def main():
     button_no = 1
     p1_chips = -1
     p2_chips = -1
+    p1_in_pot = 0
+    p2_in_pot = 0
+    amount_to_call=0
 
-    # TODO: print hole cards
-    # TODO: print actions
-    # TODO: print board
-    # TODO: print results
     for line in sys.stdin:
         bits = line.strip().split(" ")
         if bits[0]=='Match':
@@ -72,10 +71,11 @@ def main():
                     assert False
                 hand_header = hand_header_fmt % (hand_no,button_no)
                 print hand_header
+                
             elif bits[1]=='maxWinPot':
                 continue
             elif bits[1]=='amountToCall':
-                continue
+                amount_to_call = bits[2]
             elif bits[1]=='table':
                 # TODO: 
                 # Match table [Kd,Tc,6c]
@@ -93,9 +93,11 @@ def main():
         if bits[1]=='stack':
             data = bits[2]
             if bits[0]=='player1':
-                p1_chips = data
+                p1_chips = int(data)
+                p1_in_pot = 0
             elif bits[0]=='player2':
-                p2_chips = data
+                p2_chips = int(data)
+                p2_in_pot = 0
                 print_stacks(p1_chips,p2_chips)
             else:
                 print line
@@ -104,12 +106,16 @@ def main():
             if bits[0]=='player1':
                 blind_type = "small blind" if button_no==1 else "big blind"
                 print "player1: posts the %s %s" % (blind_type,bits[2])
+                p1_in_pot += int(bits[2])
             elif bits[0]=='player2':
                 blind_type = "small blind" if button_no==2 else "big blind"
                 print "player2: posts the %s %s" % (blind_type,bits[2])
+                p2_in_pot += int(bits[2])
             else:
                 print line
                 assert False
+            assert p1_in_pot <= p1_chips
+            assert p2_in_pot <= p2_chips
         elif bits[1]=='finished':
             continue
         elif bits[1]=='hand':
@@ -126,26 +132,63 @@ def main():
                 print line
                 assert False
         elif bits[1]=='call':
-            # TODO
             # player2 call 10
             # kovilen007: calls 8293 and is all-in
-            continue
+            suffix = ""
+            if bits[0]=='player1':
+                p1_in_pot += int(bits[2])
+                if p1_in_pot==p1_chips:
+                    suffix=" and is all-in"
+            elif bits[0]=='player2':
+                p2_in_pot += int(bits[2])
+                if p2_in_pot==p2_chips:
+                    suffix=" and is all-in"
+            else:
+                print line
+                assert False
+            print "%s: calls %s%s" % (bits[0],bits[2],suffix)
+            assert p1_in_pot <= p1_chips
+            assert p2_in_pot <= p2_chips
         elif bits[1]=='check':
-            # TODO
+            print "%s: check" % (bits[0],)
             # player1 check 0
             # kovilen007: checks ???
             continue
         elif bits[1]=='fold':
-            # TODO
+            print "%s: folds" % (bits[0],)
             # player1 fold 0
             # kovilen007: folds
             continue
         elif bits[1]=='raise':
-            # TODO: aig doesn't distinguish between bet and raise
+            # aig doesn't distinguish between bet and raise
             # player1 raise 40
             # 
             # Orlando I: raises 15484 to 17984 and is all-in
-            continue
+
+            # XXX: raise 200 == 200 ontop of amounttocall
+            # verified this for only one example
+            suffix = ""
+            if bits[0]=='player1':
+                p1_in_pot += int(bits[2]) + int(amount_to_call)
+                if p1_in_pot==p1_chips:
+                    suffix=" and is all-in"
+            elif bits[0]=='player2':
+                p2_in_pot += int(bits[2]) + int(amount_to_call)
+                if p2_in_pot==p2_chips:
+                    suffix=" and is all-in"
+            else:
+                print line
+                assert False
+
+            if amount_to_call=="0":
+                # XXX: bet. have no example
+                print "%s: bets %s%s" % (bits[0],bits[2],suffix)
+            else:
+                # raise
+                total = 0 # TODO: track
+                print "%s: raises %s to %d%s" % (bits[0],bits[2],total,suffix)
+            assert p1_in_pot <= p1_chips
+            assert p2_in_pot <= p2_chips
         elif bits[1]=='wins':
             # TODO need to eval hands, what happens if not all pot won
             # player1 wins 40
@@ -159,5 +202,7 @@ def main():
         else:
             print line
             assert False
+
+# cat poker-engine/out.txt| python pbots/aig_to_ps.py 
 if __name__=='__main__':
     main()
