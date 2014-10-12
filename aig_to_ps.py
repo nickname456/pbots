@@ -2,6 +2,20 @@
 import sys
 import poker
 
+# TODO: not validated against actual ps hh
+hand_names = {'9': "royal flush",
+              '8': "straight flush",
+              '7': "four of a kind",
+              '6': "full house",
+              '5': "flush",
+              '4': "straight",
+              '3': "three of a kind",
+              '2': "two pair",
+              '1': "a pair of",
+              '0': "high card",
+                }
+value_names = ["Deuce","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King","Ace"]
+
 def print_stacks(s1,s2):
     print "Seat 1: player1 (%d in chips)" % (s1,)
     print "Seat 2: player2 (%d in chips)" % (s2,)
@@ -147,7 +161,6 @@ def main():
                     assert False
                 hole_cards_done = True
             else:
-                print "%s: shows %s (TODO: evaluate)" % (bits[0],bits[2].replace(","," "))
                 hole_cards = bits[2][1:-1].split(",")
                 best_combo = None
                 for i in range(0,4):
@@ -162,13 +175,14 @@ def main():
                                     if best_combo is None or hand > best_combo:
                                         best_combo = hand
                 print best_combo.cards,best_combo.rank
-                # TODO: showdown valuation
+                # TODO: Print human readable
                 # TODO: not sure about the "best" one i'm getting
                 # oh wait, it's fine
                 #*** RIVER *** [6s 5h 6c Qc] [8h]
                 #player1: shows [8d 9d 3d Qh] (TODO: evaluate)
                 #[8d, Qh, 6s, Qc, 8h] ['2', 10, 6, 4]
                 # last 3 numbers are Q, 8, kicker of 6, for sort order
+                print "%s: shows %s (TODO: evaluate)" % (bits[0],bits[2].replace(","," "))
 
         elif bits[1]=='call':
             # player2 call 10
@@ -230,10 +244,8 @@ def main():
             assert p1_in_pot <= p1_chips
             assert p2_in_pot <= p2_chips
         elif bits[1]=='wins':
-            # TODO need to eval hands, what happens if not all pot won
+            # TODO Who wins what
             # uncalled bets...
-            # TODO: exmaple bot has hand ranker... quite nice too. for 5 cards
-            #
             # player1 wins 40
             #
             # ElT007 collected 11018 from side pot-2
