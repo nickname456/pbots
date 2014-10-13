@@ -2,6 +2,8 @@
 import sys
 import poker
 
+
+
 # TODO: not validated against actual ps hh
 hand_names = {'9': "royal flush",
               '8': "straight flush",
@@ -65,6 +67,7 @@ def main():
     full_board = None  # XXX: Do we only print eval on river, or for eg say they have 2 pair on the flop if we're all in?
 
     for line in sys.stdin:
+        #print "#",line # debugging
         bits = line.strip().split(" ")
         if bits[0]=='Match':
             data = bits[2]
@@ -95,12 +98,15 @@ def main():
                 continue
             elif bits[1]=='amountToCall':
                 amount_to_call = int(bits[2])
-                current_bet = amount_to_call*2 # sb preflop, 0 postflop streets
+                # XXX not always seen before action :( will look for blinds
+                #current_bet = amount_to_call*2 # sb preflop, 0 postflop streets
             elif bits[1]=='table':
                 # Match table [Kd,Tc,6c]
                 # *** FLOP *** [2d 2c 3c]
                 # *** TURN *** [2d 2c 3c] [8h]
                 # *** RIVER *** [2d 2c 3c 8h] [4d]
+                current_bet = 0
+                amount_to_call = 0
                 cards = bits[2][1:-1].split(",")
                 if len(cards)==3:
                     print "*** FLOP *** [%s %s %s]" % (cards[0],cards[1],cards[2])
@@ -120,6 +126,8 @@ def main():
             continue
         
         if bits[1]=='stack':
+            current_bet = 0 # only seen at start of hand
+            amount_to_call = 0
             data = bits[2]
             if bits[0]=='player1':
                 p1_chips = int(data)
@@ -132,6 +140,13 @@ def main():
                 print line
                 assert False
         elif bits[1]=='post':
+            # blinds always before action
+            if int(bits[2])>current_bet:
+                current_bet = int(bits[2])
+            if int(bits[2])>amount_to_call:
+                # Don't always see an actual amount_to_call msg before action
+                amount_to_call = int(bits[2])/2
+
             if bits[0]=='player1':
                 blind_type = "small blind" if button_no==1 else "big blind"
                 print "player1: posts the %s %s" % (blind_type,bits[2])
