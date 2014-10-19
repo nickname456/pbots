@@ -2,13 +2,12 @@
 import sys
 import poker
 
-# TODO: not validated against actual ps hh
 hand_names = {'9': "royal flush",
               '8': "straight flush",
               '7': "four of a kind",
               '6': "full house",
-              '5': "flush",
-              '4': "straight",
+              '5': "a flush",
+              '4': "a straight",
               '3': "three of a kind",
               '2': "two pair",
               '1': "a pair of",
@@ -39,21 +38,22 @@ def int_to_roman(input):
 
 def main():
     #header = "PokerStars Game #27738502010: Tournament #160417133, $0.25+$0.00 Hold'em No Limit - Level XV (250/500) - 2009/05/02 13:32:38 ET"
-    header_fmt = "PokerStars Game #%d: Tournament #%d, $0.25+$0.00 Hold'em No Limit - Level %s (%s/%s) - %s ET"
-    game_no = 0
+    #header_fmt = "PokerStars Game #%d: Tournament #%d, $0.25+$0.00 Hold'em No Limit - Level %s (%s/%s) - %s ET"
+    header_fmt = "PokerStars Hand #%s: Tournament #%d, $0.25+$0.00 USD Hold'em No Limit - Level %s (%s/%s) - %s ET"
+    hand_no = '0'
     tourney_no = 0
     lvl = 0
     (sb,bb) = ("250","500")
-    time_str = '2009/05/02 13:32:38'
+    time_str = '2009/05/02 13:32:38' # TODO: advance
 
-    header = header_fmt % (game_no,tourney_no,lvl,sb,bb,time_str)
+    header = header_fmt % (hand_no,tourney_no,lvl,sb,bb,time_str)
 
     # FIXME: what's the table numbering here?
-    # FIXME: what's heads up?
+    # FIXME: what's heads up lablled as?
     #hand_header_fmt = "Table '160417133 3' 9-max Seat #8 is the button "
     hand_header_fmt = "Table '160417133 %s' 2-max Seat #%d is the button "
 
-    hand_no= "1" # guess at meaning
+    mystery_no= "1" # guess at meaning
     button_no = 1
     p1_chips = -1
     p2_chips = -1
@@ -62,6 +62,7 @@ def main():
     amount_to_call=0 # from start of street
     current_bet = 0
     hole_cards_done = False # assuming we see 1 player'scards per dump
+    showdown_started = False
     full_board = None  # XXX: Do we only print eval on river, or for eg say they have 2 pair on the flop if we're all in?
 
     for line in sys.stdin:
@@ -71,6 +72,7 @@ def main():
             if bits[1]=='round':
                 hand_no = data
                 hole_cards_done = False
+                showdown_started = False
             elif bits[1]=='smallBlind':
                 sb = data
             elif bits[1]=='bigBlind':
@@ -78,8 +80,6 @@ def main():
                     bb = data
                     lvl += 1
                     roman_lvl= int_to_roman(lvl)
-                    header = header_fmt % (game_no,tourney_no,roman_lvl,sb,bb,time_str)
-                    print header
             elif bits[1]=='onButton':
                 if data=='player1':
                     button_no = 1
@@ -88,7 +88,13 @@ def main():
                 else:
                     print line
                     assert False
-                hand_header = hand_header_fmt % (hand_no,button_no)
+                
+                print
+                print "*********** # %s **************" % (hand_no,)
+
+                header = header_fmt % (hand_no,tourney_no,roman_lvl,sb,bb,time_str)
+                print header
+                hand_header = hand_header_fmt % (mystery_no,button_no)
                 print hand_header
                 
             elif bits[1]=='maxWinPot':
@@ -161,6 +167,9 @@ def main():
                     assert False
                 hole_cards_done = True
             else:
+                if not showdown_started:
+                    print "*** SHOW DOWN ***"
+                    showdown_started = True
                 hole_cards = bits[2][1:-1].split(",")
                 best_combo = None
                 for i in range(0,4):
@@ -175,7 +184,7 @@ def main():
                                     if best_combo is None or hand > best_combo:
                                         best_combo = hand
                 # XXX: after the hand rank, unique card values in the hand 
-                print best_combo.cards,best_combo.rank
+                #print best_combo.cards,best_combo.rank
                 hand_repr=""
                 r = best_combo.rank
                 if r[0]=='0':
@@ -189,15 +198,12 @@ def main():
                                         value_names[r[1]],
                                         value_names[r[2]],)
                 elif r[0]=='3':
-                    # TODO: not validated against actual hh
                     hand_repr = "%s, %ss" % (hand_names[r[0]],
                                         value_names[r[1]])
                 elif r[0]=='4':
-                    # TODO: not validated against actual hh
                     hand_repr = "%s, %s high" % (hand_names[r[0]],
                                         value_names[r[1]])
                 elif r[0]=='5':
-                    # TODO: not validated against actual hh
                     hand_repr = "%s, %s high" % (hand_names[r[0]],
                                         value_names[r[1]])
                 elif r[0]=='6':
@@ -236,18 +242,15 @@ def main():
             else:
                 print line
                 assert False
+            # calls X where X is amount remaining. eg. sb 10, bb 20, sb "calls 10"    
             print "%s: calls %s%s" % (bits[0],bits[2],suffix)
             assert p1_in_pot <= p1_chips
             assert p2_in_pot <= p2_chips
         elif bits[1]=='check':
-            print "%s: check" % (bits[0],)
-            # player1 check 0
-            # kovilen007: checks ???
+            print "%s: checks" % (bits[0],)
             continue
         elif bits[1]=='fold':
             print "%s: folds" % (bits[0],)
-            # player1 fold 0
-            # kovilen007: folds
             continue
         elif bits[1]=='raise':
             # aig doesn't distinguish between bet and raise
@@ -273,7 +276,6 @@ def main():
                 assert False
 
             if amount_to_call==0:
-                # FIXME: bet. have no example
                 print "%s: bets %s%s" % (bits[0],bits[2],suffix)
             else:
                 # raise
@@ -282,8 +284,32 @@ def main():
             assert p2_in_pot <= p2_chips
         elif bits[1]=='wins':
             # TODO Who wins what
-            # uncalled bets...
-            # player1 wins 40
+            # TODO: uncalled bets...
+            # TODO mucking hands on showdown? poker-engine never does that?
+            # no side pots if heads up 
+
+            print "%s collected %s from pot" % (bits[0],bits[2])
+            
+            # player1 post 10
+            # player2 post 20
+            # player1 hand [Jh,Kd,Ac,Kc]
+            # Match maxWinPot 30
+            # Match amountToCall 10
+            # Action player1 10000
+            # Output from your bot: "raise 40"
+            # player1 raise 40
+            # player2 fold 0
+            # player1 wins 80
+            # Match round 7
+            #
+            # mvinc131: raises 2710 to 2770 and is all-in
+            # person456: folds
+            # Uncalled bet (2710) returned to mvinc131
+            # mvinc131 collected 130 from pot
+            #
+            # b3rimba: raises 433 to 453 and is all-in
+            # mvinc131: calls 273 and is all-in
+            # Uncalled bet (160) returned to b3rimba
             #
             # ElT007 collected 11018 from side pot-2
             # Orlando I: shows [5d 5h] (two pair, Fives and Deuces)
