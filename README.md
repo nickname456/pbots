@@ -27,3 +27,6 @@ pbots
 - To experiment I have been doing something like `seq 50 | parallel --gnu  java -classpath /home/nick/projects/pokerbot/theaigames/poker-engine/bin nl.starapple.backend.RunPoker 2000 "./multibot.py\ ExampleBot" "./multibot.py\ PairBot" 2> err.txt 1> out.txt` and then `egrep "Winner|Score" out.txt`
 - Haven't decided how best for bot writers to compare their results without sharing code. % won against an agreed set of dumber bots?
 
+4) Visualisation
+- eg. Create a log from player2's point of view that is readable by http://universal-replayer.net/
+- cat example_log.txt | python aig_to_ps.py 2 > ../test_hh/test2.txt
