@@ -35,11 +35,14 @@ def int_to_roman(input):
       input -= ints[i] * count
    return result
 
-
+# FIXME: output 2 dumps, one from each players' point of view/
+# If you import everything at once into universal replayer, it shows
+# each hand "twice"
 def main():
     #header = "PokerStars Game #27738502010: Tournament #160417133, $0.25+$0.00 Hold'em No Limit - Level XV (250/500) - 2009/05/02 13:32:38 ET"
     #header_fmt = "PokerStars Game #%d: Tournament #%d, $0.25+$0.00 Hold'em No Limit - Level %s (%s/%s) - %s ET"
-    header_fmt = "PokerStars Hand #%s: Tournament #%d, $0.25+$0.00 USD Hold'em No Limit - Level %s (%s/%s) - %s ET"
+    #header_fmt = "PokerStars Hand #%s: Tournament #%d, $0.25+$0.00 USD Hold'em No Limit - Level %s (%s/%s) - %s ET"
+    header_fmt = "PokerStars Hand #%s: Tournament #%d, $0.25+$0.00 USD Omaha Pot Limit - Level %s (%s/%s) - %s ET"
     hand_no = '0'
     tourney_no = 0
     lvl = 0
@@ -140,11 +143,11 @@ def main():
         elif bits[1]=='post':
             if bits[0]=='player1':
                 blind_type = "small blind" if button_no==1 else "big blind"
-                print "player1: posts the %s %s" % (blind_type,bits[2])
+                print "player1: posts %s %s" % (blind_type,bits[2])
                 p1_in_pot += int(bits[2])
             elif bits[0]=='player2':
                 blind_type = "small blind" if button_no==2 else "big blind"
-                print "player2: posts the %s %s" % (blind_type,bits[2])
+                print "player2: posts %s %s" % (blind_type,bits[2])
                 p2_in_pot += int(bits[2])
             else:
                 print line
