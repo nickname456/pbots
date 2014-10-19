@@ -35,10 +35,14 @@ def int_to_roman(input):
       input -= ints[i] * count
    return result
 
-# FIXME: output 2 dumps, one from each players' point of view/
+# XXX: output 2 dumps, one from each players' point of view/
 # If you import everything at once into universal replayer, it shows
 # each hand "twice"
 def main():
+    player_pov = sys.argv[1]
+    translate_log(player_pov)
+
+def translate_log(player_pov='1'):    
     #header = "PokerStars Game #27738502010: Tournament #160417133, $0.25+$0.00 Hold'em No Limit - Level XV (250/500) - 2009/05/02 13:32:38 ET"
     #header_fmt = "PokerStars Game #%d: Tournament #%d, $0.25+$0.00 Hold'em No Limit - Level %s (%s/%s) - %s ET"
     #header_fmt = "PokerStars Hand #%s: Tournament #%d, $0.25+$0.00 USD Hold'em No Limit - Level %s (%s/%s) - %s ET"
@@ -68,8 +72,18 @@ def main():
     showdown_started = False
     full_board = None  # XXX: Do we only print eval on river, or for eg say they have 2 pair on the flop if we're all in?
 
+    in_my_section=False
+
     for line in sys.stdin:
         bits = line.strip().split(" ")
+        if bits[0]=='Bot':
+            if bits[2]=='Dump:':
+                if bits[1]==player_pov:
+                    in_my_section = True
+                else:
+                    in_my_section = False
+        if not in_my_section:
+            continue
         if bits[0]=='Match':
             data = bits[2]
             if bits[1]=='round':
