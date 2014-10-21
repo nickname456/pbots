@@ -2,12 +2,7 @@
 import sys
 import poker
 
-<<<<<<< HEAD
-=======
-
-
 # TODO: not validated against actual ps hh
->>>>>>> d57b55930620a6aaeec5f62e7b7b0a5a9b6d0b07
 hand_names = {'9': "royal flush",
               '8': "straight flush",
               '7': "four of a kind",
