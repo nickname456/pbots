@@ -19,6 +19,11 @@ class Bot(object):
             'me': {},
             'opponent': {}
         }
+        
+        # XXX:
+        # Don't always get amountToCall preflop for some reason,
+        # so need to remember the blinds
+        self.sb = 0
 
     def run(self):
         '''
@@ -77,6 +82,10 @@ class Bot(object):
         key, value = options
         self.match_settings[key] = value
 
+        if key=='smallBlind':
+            self.sb = int(value)
+
+
     def update_game_state(self, player, info_type, info_value):
         '''
         Updates game state
@@ -92,13 +101,20 @@ class Bot(object):
             elif info_type == 'post':
                 self.bots['me']['stack'] -= int(info_value)
 
+            elif info_type == 'call':
+                self.bots['me']['stack'] -= int(info_value)
+
+            elif info_type == 'raise':
+                amt = int(info_value) + int(self.match_settings['amountToCall']) if 'amountToCall' in self.match_settings else self.sb
+                self.bots['me']['stack'] -= amt
+
             # Update bot cards
             elif info_type == 'hand':
                 self.bots['me']['pocket'] = Pocket(self.parse_cards(info_value))
 
             # Round winnings, currently unused
             elif info_type == 'wins':
-                pass
+                self.bots['me']['stack'] += int(info_value)
 
             else:
                 stderr.write('Unknown info_type: %s\n' % (info_type))
@@ -113,13 +129,20 @@ class Bot(object):
             elif info_type == 'post':
                 self.bots['opponent']['stack'] -= int(info_value)
 
+            elif info_type == 'call':
+                self.bots['opponent']['stack'] -= int(info_value)
+
+            elif info_type == 'raise':
+                amt = int(info_value) + int(self.match_settings['amountToCall']) if 'amountToCall' in self.match_settings else self.sb
+                self.bots['opponent']['stack'] -= amt
+
             # Opponent hand on showdown, currently unused
             elif info_type == 'hand':
                 pass
 
             # Opponent round winnings, currently unused
             elif info_type == 'wins':
-                pass
+                self.bots['opponent']['stack'] += int(info_value)
 
     def make_move(self, timeout):
         '''
