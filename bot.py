@@ -51,17 +51,13 @@ class Bot(object):
 
                 if command == 'settings':
                     self.update_settings(parts[1:])
-                    pass
                 elif command == 'match':
                     self.update_match_info(parts[1:])
-                    pass
                 elif command.startswith('player'):
                     self.update_game_state(parts[0], parts[1], parts[2])
-                    pass
                 elif command == 'action':
                     stdout.write(self.make_move(parts[2]) + '\n')
                     stdout.flush()
-                    pass
                 else:
                     stderr.write('Unknown command: %s\n' % (command))
                     stderr.flush()
@@ -115,9 +111,12 @@ class Bot(object):
             # Round winnings, currently unused
             elif info_type == 'wins':
                 self.bots['me']['stack'] += int(info_value)
-
+            elif info_type == 'fold':
+                pass # no state adjustment needed
+            elif info_type == 'check':
+                pass # no state adjustment needed
             else:
-                stderr.write('Unknown info_type: %s\n' % (info_type))
+                stderr.write('Unknown info_type (me): %s %s\n' % (info_type, info_value))
 
         else:
 
@@ -143,6 +142,12 @@ class Bot(object):
             # Opponent round winnings, currently unused
             elif info_type == 'wins':
                 self.bots['opponent']['stack'] += int(info_value)
+            elif info_type == 'fold':
+                pass # no state adjustment needed
+            elif info_type == 'check':
+                pass # no state adjustment needed
+            else:
+                stderr.write('Unknown info_type (me): %s %s\n' % (info_type, info_value))
 
     def make_move(self, timeout):
         '''
