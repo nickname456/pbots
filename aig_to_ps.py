@@ -74,24 +74,52 @@ def translate_log(player_pov='1'):
     full_board = None  # XXX: Do we only print eval on river, or for eg say they have 2 pair on the flop if we're all in?
 
     in_my_section=False
+    in_my_stderr=False
+
+    # XXX: For debugging: bot author can print a special message to stderr each
+    # hand which will be included in the converted hand history, just for
+    # manual examination
+    my_special_messages=[]
+    print_special_messages=False # TODO: commandline option
+    special_message_prefix="TODO"
 
     for line in sys.stdin:
         #print "#",line # debugging
         bits = line.strip().split(" ")
+
+        # Stderr section comes before dump for each bot
         if bits[0]=='Bot':
             if bits[2]=='Dump:':
                 if bits[1]==player_pov:
                     in_my_section = True
                 else:
                     in_my_section = False
+                in_my_stderr = False
+        
+        if bits[0]=='Bot':
+            if bits[2]=='Errors:':
+                if bits[1]==player_pov:
+                    in_my_stderr = True
+                else:
+                    in_my_stderr = False
+                in_my_section = False
+        
+        if in_my_stderr and line.startswith(special_message_prefix):
+            my_special_messages.append(line)
+            continue
+        
         if not in_my_section:
             continue
+        
         if bits[0]=='Match':
             data = bits[2]
             if bits[1]=='round':
                 hand_no = data
                 hole_cards_done = False
                 showdown_started = False
+                # before next hand:
+                if print_special_messages and len(my_special_messages)>0:
+                    print my_special_messages.pop(0)
             elif bits[1]=='smallBlind':
                 sb = data
             elif bits[1]=='bigBlind':
