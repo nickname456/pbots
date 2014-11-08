@@ -41,9 +41,12 @@ def int_to_roman(input):
 # each hand "twice"
 def main():
     player_pov = sys.argv[1]
-    translate_log(player_pov)
+    print_special_messages = sys.argv[2]!='0'
+    translate_log(player_pov, print_special_messages)
 
-def translate_log(player_pov='1'):    
+
+def translate_log(player_pov='1',print_special_messages=False):    
+
     #header = "PokerStars Game #27738502010: Tournament #160417133, $0.25+$0.00 Hold'em No Limit - Level XV (250/500) - 2009/05/02 13:32:38 ET"
     #header_fmt = "PokerStars Game #%d: Tournament #%d, $0.25+$0.00 Hold'em No Limit - Level %s (%s/%s) - %s ET"
     #header_fmt = "PokerStars Hand #%s: Tournament #%d, $0.25+$0.00 USD Hold'em No Limit - Level %s (%s/%s) - %s ET"
@@ -80,8 +83,8 @@ def translate_log(player_pov='1'):
     # hand which will be included in the converted hand history, just for
     # manual examination
     my_special_messages=[]
-    print_special_messages=False # TODO: commandline option
     special_message_prefix="TODO"
+    done_first_hand = False
 
     for line in sys.stdin:
         #print "#",line # debugging
@@ -118,8 +121,11 @@ def translate_log(player_pov='1'):
                 hole_cards_done = False
                 showdown_started = False
                 # before next hand:
-                if print_special_messages and len(my_special_messages)>0:
+                if print_special_messages and \
+                 len(my_special_messages)>0 and \
+                 done_first_hand:
                     print my_special_messages.pop(0)
+                done_first_hand = True
             elif bits[1]=='smallBlind':
                 sb = data
             elif bits[1]=='bigBlind':
