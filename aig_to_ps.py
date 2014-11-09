@@ -2,7 +2,6 @@
 import sys
 import poker
 
-# TODO: not validated against actual ps hh
 hand_names = {'9': "royal flush",
               '8': "straight flush",
               '7': "four of a kind",
@@ -124,7 +123,8 @@ def translate_log(player_pov='1',print_special_messages=False):
                 if print_special_messages and \
                  len(my_special_messages)>0 and \
                  done_first_hand:
-                    print my_special_messages.pop(0)
+                    msg = my_special_messages.pop(0)
+                    print msg
                 done_first_hand = True
             elif bits[1]=='smallBlind':
                 sb = data
