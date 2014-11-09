@@ -28,5 +28,5 @@ pbots
 - Haven't decided how best for bot writers to compare their results without sharing code. % won against an agreed set of dumber bots?
 
 4) Visualisation
-- eg. Create a log from player2's point of view that is readable by http://universal-replayer.net/
-- cat example_log.txt | python aig_to_ps.py 2 > ../test_hh/test2.txt
+- eg. Create a log from player2's point of view that is readable by http://universal-replayer.net/ . Not using "special messages" feature (Have a bot print tagged messages for each hand to stderr for inclusion in the converted hand history, for debugging purposes)
+- cat example_log.txt | python aig_to_ps.py 2 0 > ../test_hh/test2.txt
