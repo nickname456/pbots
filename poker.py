@@ -61,6 +61,9 @@ class Hand(object):
     def __eq__(self, hand):
         return self.rank == hand.rank
 
+    def __repr__(self):
+        return "Hand:"+str(self.cards)+" rank"+str(self.rank)
+
 class Ranker(object):
     '''
     Ranker class
@@ -77,8 +80,10 @@ class Ranker(object):
         # Additional straight check
         if not is_straight:
 
-            # Weakest straight
-            is_straight = all(values[i] == values[0] + i for i in range(4)) and values[4] == 12
+            # Wheel
+            is_straight = all(values[i] == values[0] + i for i in range(4)) \
+                            and values[4] == 12 \
+                            and values[0] == 0
 
             # Rotate values as the ace is weakest in this case
             values = values[1:] + values[:1]

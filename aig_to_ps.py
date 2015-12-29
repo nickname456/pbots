@@ -49,8 +49,10 @@ def translate_log(player_pov='1',print_special_messages=False, nlh=False):
 
     #header = "PokerStars Game #27738502010: Tournament #160417133, $0.25+$0.00 Hold'em No Limit - Level XV (250/500) - 2009/05/02 13:32:38 ET"
     #header_fmt = "PokerStars Game #%d: Tournament #%d, $0.25+$0.00 Hold'em No Limit - Level %s (%s/%s) - %s ET"
-    #header_fmt = "PokerStars Hand #%s: Tournament #%d, $0.25+$0.00 USD Hold'em No Limit - Level %s (%s/%s) - %s ET"
+
     header_fmt = "PokerStars Hand #%s: Tournament #%d, $0.25+$0.00 USD Omaha Pot Limit - Level %s (%s/%s) - %s ET"
+    if nlh:
+        header_fmt = "PokerStars Hand #%s: Tournament #%d, $0.25+$0.00 USD Hold'em No Limit - Level %s (%s/%s) - %s ET"
     hand_no = '0'
     tourney_no = 0
     lvl = 0
@@ -293,6 +295,7 @@ def translate_log(player_pov='1',print_special_messages=False, nlh=False):
                     print r
                     assert False
                 print "%s: shows %s (%s)" % (bits[0],bits[2].replace(","," "),hand_repr)
+                #print best_combo # debugging
 
         elif bits[1]=='call':
             # player2 call 10
