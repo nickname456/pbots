@@ -18,13 +18,12 @@ pbots
 - The engine exec()s the supplied commands as the 2 players and communicates via  simple protocol on stdin/stdout. So you can use any language you want
 - Protocol here http://theaigames.com/competitions/heads-up-omaha/getting-started#
 - Engine does the second most popular variant of poker, PLO, by default (http://en.wikipedia.org/wiki/Omaha_hold_%27em), because it is a less solved game than the more popular No Limit Texas Holdem. Depending on what people want, we could go either way
+- apply the seed_rng.patch to the theaigames engine to add RNG seed and game type commandline options (so you can have repeatable games for testing, and switch to NLH without recompiling all the time)
 
 
 3) Evaluation
 - Does the "score" say how many hands the match took? That's not a very good metric. 
 - % of games won over a large sample would be better
-- Note GNU parallel "bug" in Debian, where --tollef is default
-- To experiment I have been doing something like `seq 50 | parallel --gnu  java -classpath /home/nick/projects/pokerbot/theaigames/poker-engine/bin nl.starapple.backend.RunPoker 2000 "./multibot.py\ ExampleBot" "./multibot.py\ PairBot" 2> err.txt 1> out.txt` and then `egrep "Winner|Score" out.txt`
 - Haven't decided how best for bot writers to compare their results without sharing code. % won against an agreed set of dumber bots?
 
 4) Visualisation
