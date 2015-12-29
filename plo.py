@@ -1,3 +1,7 @@
+#
+# Some simple PLO bots for benchmarking
+#
+
 import sys
 from sys import stderr, stdin, stdout
 from poker import Card, Hand, Pocket, Table
