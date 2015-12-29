@@ -14,6 +14,7 @@ import sys
 from poker import Card, Hand, Pocket, Table
 import random
 from bot import Bot
+import argparse
 
 
 class ExampleBot(Bot):
@@ -228,14 +229,26 @@ class RockBot(Bot):
 
 
 if __name__ == '__main__':
-    if len(sys.argv)==2:
-        name = sys.argv[1]
+
+    parser = argparse.ArgumentParser(description='Run a poker bot')
+    parser.add_argument('--bot-name',default="ExampleBot",type=str)
+    parser.add_argument('--game',default="PLO",type=str)
+    args = parser.parse_args()
+
+    botnames = []
+    botclasses = []
+    if args.game=="PLO":
         botnames = ["ExampleBot","CallBot","AvgValuePotBot","PotBot","RandomBot","FoldBot","PairBot","RockBot"]
-        if name in botnames:
-            botclasses = [ExampleBot,CallBot,AvgValuePotBot,PotBot,RandomBot,FoldBot,PairBot,RockBot]
-            c = botclasses[botnames.index(name)]
-            c().run()
-        else:
-            ExampleBot().run()
+        botclasses = [ExampleBot,CallBot,AvgValuePotBot,PotBot,RandomBot,FoldBot,PairBot,RockBot]
+    elif args.game=="NLH":
+        botnames = []
+        botclasses = []
     else:
-        ExampleBot().run()
+        print "--game NLH|PLO"
+        sys.exit(1)
+
+    if args.bot_name in botnames:
+        c = botclasses[botnames.index(args.bot_name)]
+        c().run()
+    else:
+        print "for game %s bot names are %s" % (args.game,str(botnames))
