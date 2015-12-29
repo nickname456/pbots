@@ -41,10 +41,11 @@ def int_to_roman(input):
 def main():
     player_pov = sys.argv[1]
     print_special_messages = sys.argv[2]!='0'
-    translate_log(player_pov, print_special_messages)
+    nlh = sys.argv[3]!='0'
+    translate_log(player_pov, print_special_messages, nlh)
 
 
-def translate_log(player_pov='1',print_special_messages=False):    
+def translate_log(player_pov='1',print_special_messages=False, nlh=False):
 
     #header = "PokerStars Game #27738502010: Tournament #160417133, $0.25+$0.00 Hold'em No Limit - Level XV (250/500) - 2009/05/02 13:32:38 ET"
     #header_fmt = "PokerStars Game #%d: Tournament #%d, $0.25+$0.00 Hold'em No Limit - Level %s (%s/%s) - %s ET"
@@ -237,8 +238,9 @@ def translate_log(player_pov='1',print_special_messages=False):
                     showdown_started = True
                 hole_cards = bits[2][1:-1].split(",")
                 best_combo = None
-                for i in range(0,4):
-                    for j in range(i+1,4):
+                n_hole_cards = 2 if nlh else 4
+                for i in range(0,n_hole_cards):
+                    for j in range(i+1,n_hole_cards):
                         c1,c2 = hole_cards[i],hole_cards[j]
                         for b1 in range(0,5):
                             for b2 in range(b1+1,5):
@@ -386,6 +388,8 @@ def translate_log(player_pov='1',print_special_messages=False):
             print line
             assert False
 # read https://github.com/HHSmithy/PokerHandHistoryParser/blob/master/HandHistories.Parser/Parsers/FastParser/PokerStars/PokerStarsFastParserImpl.cs http://poker.readthedocs.org/en/latest/handhistory.html
-# cat poker-engine/out.txt| python pbots/aig_to_ps.py 
+
+# eg, for player 1 POV, no "special messages" (debugging), 1 for NLH
+# cat poker-engine/out.txt | python pbots/aig_to_ps.py 1 0 1
 if __name__=='__main__':
     main()
