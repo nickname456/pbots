@@ -1,5 +1,5 @@
 diff --git a/src/nl/starapple/backend/RunPoker.java b/src/nl/starapple/backend/RunPoker.java
-index 759d184..7e8db43 100644
+index 759d184..64cd841 100644
 --- a/src/nl/starapple/backend/RunPoker.java
 +++ b/src/nl/starapple/backend/RunPoker.java
 @@ -49,20 +49,30 @@ public class RunPoker
@@ -41,15 +41,23 @@ index 759d184..7e8db43 100644
  	}
  
  	public RunPoker(String args[])
-@@ -70,6 +80,7 @@ public class RunPoker
+@@ -70,6 +80,8 @@ public class RunPoker
  		startingStack = Integer.valueOf(args[0]);
          this.bot1Command = args[1];
          this.bot2Command = args[2];
 +        this.rngSeed = Integer.parseInt(args[3]);
++        gameType = Integer.parseInt(args[4]);
  
  		this.playerName1 = "player1";
  		this.playerName2 = "player2";
-@@ -97,7 +108,7 @@ public class RunPoker
+@@ -91,13 +103,13 @@ public class RunPoker
+ 		bots.add(player2);
+ 
+ 		//gametype is omaha tournament (with two players):
+-		gameType = 18;
++		//gameType = 18; // 13 for no limit holdem
+ 		//number of hands is unlimited
+ 		numberOfHands = -1;
  		//one winner
  		placesPaid = 1;
  		
@@ -58,7 +66,7 @@ index 759d184..7e8db43 100644
          engine.finishSetup(true);
          ArrayList<String> results = engine.run(numberOfHands, 0);
          for(int i = 0; i < results.size(); i++)
-@@ -127,7 +138,7 @@ public class RunPoker
+@@ -127,7 +139,7 @@ public class RunPoker
          }
          catch(Exception e) {}
  
@@ -67,92 +75,10 @@ index 759d184..7e8db43 100644
  	}
      
  	/**
-@@ -288,4 +299,4 @@ public class RunPoker
+@@ -288,4 +300,4 @@ public class RunPoker
          System.out.println(bot2.getDump());	
  	}
  
 -}
 \ No newline at end of file
 +}
-diff --git a/src/nl/starapple/poker/Deck.java b/src/nl/starapple/poker/Deck.java
-index 2ebfc61..07c4571 100644
---- a/src/nl/starapple/poker/Deck.java
-+++ b/src/nl/starapple/poker/Deck.java
-@@ -18,6 +18,7 @@
- package nl.starapple.poker;
- import java.util.ArrayList;
- import java.util.Collections;
-+import java.util.Random;
- 
- /**
-  * Class representing a single deck of cards, which is shuffled in random order.
-@@ -27,18 +28,27 @@ public class Deck
- {
- 	private ArrayList<Integer> cardOrder;
- 	private ArrayList<Integer> cardOrderSavePoint;
-+    private Random rng;
- 	
- 	/**
- 	 * Creates a new deck of 52 cards, represented by integers 0 to 51, which are
- 	 * then shuffled.
- 	 */
--	public Deck()
-+	public Deck(int seed)
- 	{
- 		cardOrder = new ArrayList<Integer>();
- 		for(int i = 0; i < 52; i++)
- 			cardOrder.add(i);
- 		
--		Collections.shuffle(cardOrder);
-+        // TODO: all runouts of cards
-+        if (seed==0)
-+        {
-+            rng = new Random();
-+        } else
-+        {
-+            rng = new Random(seed);
-+        }
-+        Collections.shuffle(cardOrder, rng);
- 	}
- 	
- 	
-@@ -51,7 +61,7 @@ public class Deck
- 		for(int i = 0; i < 52; i++)
- 			cardOrder.add(i);
- 		
--		Collections.shuffle(cardOrder);
-+		Collections.shuffle(cardOrder, rng);
- 	}
- 	
- 	
-@@ -70,7 +80,7 @@ public class Deck
- 	public void restoreToSavePoint()
- 	{
- 		cardOrder = (ArrayList<Integer>) cardOrderSavePoint.clone();
--		Collections.shuffle(cardOrder);
-+		Collections.shuffle(cardOrder, rng);
- 	}
- 	
- 	
-diff --git a/src/nl/starapple/poker/MatchPlayer.java b/src/nl/starapple/poker/MatchPlayer.java
-index aef3297..8e43480 100644
---- a/src/nl/starapple/poker/MatchPlayer.java
-+++ b/src/nl/starapple/poker/MatchPlayer.java
-@@ -118,7 +118,7 @@ public class MatchPlayer
- 	* @param game : the game that is being played, a code number for the game type.
- 	* @param startingStack : the stack size the bots start the game with.
- 	*/
--	public MatchPlayer(Collection<PokerBot> botList, int game, int startingStack)
-+	public MatchPlayer(Collection<PokerBot> botList, int game, int startingStack, int rngSeed)
- 	{
- 		// current game and hand information
- 		finishedSetup = false;
-@@ -166,7 +166,7 @@ public class MatchPlayer
- 		numberOfBots = botList.size();
- 		numberOfPlayersInTournament = 0;
- 		numberOfPlayersAtStartHand = numberOfBots;
--		deck = new Deck();
-+		deck = new Deck(rngSeed);
- 		pot = new Pot(bots);
- 		round = BetRound.PREFLOP;
- 		tableCards = new Vector<Card>();
