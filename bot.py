@@ -1,6 +1,7 @@
 from sys import stderr, stdin, stdout
 from poker import Card, Hand, Pocket, Table
 
+# Copied or simplified from initial example code
 class Bot(object):
     '''
     Main bot class

@@ -44,7 +44,7 @@ def main():
     nlh = sys.argv[3]!='0'
     translate_log(player_pov, print_special_messages, nlh)
 
-
+# TODO: Needs a major refactor. I was discovering the format while coding this
 def translate_log(player_pov='1',print_special_messages=False, nlh=False):
 
     #header = "PokerStars Game #27738502010: Tournament #160417133, $0.25+$0.00 Hold'em No Limit - Level XV (250/500) - 2009/05/02 13:32:38 ET"
