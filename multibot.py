@@ -30,8 +30,8 @@ if __name__ == '__main__':
         botnames = ["ExampleBot","CallBot","AvgValuePotBot","PotBot","RandomBot","FoldBot","PairBot","RockBot"]
         botclasses = [plo.ExampleBot,plo.CallBot,plo.AvgValuePotBot,plo.PotBot,plo.RandomBot,plo.FoldBot,plo.PairBot,plo.RockBot]
     elif args.game=="NLH":
-        botnames = ["ExampleBot","CallBot","AvgValuePotBot","PotBot","RandomBot","FoldBot","PairBot"]
-        botclasses = [nlh.ExampleBot,nlh.CallBot,nlh.AvgValuePotBot,nlh.PotBot,nlh.RandomBot,nlh.FoldBot,nlh.PairBot]
+        botnames = ["ExampleBot","CallBot","AvgValuePotBot","PotBot","RandomBot","FoldBot","PairBot","TightBot"]
+        botclasses = [nlh.ExampleBot,nlh.CallBot,nlh.AvgValuePotBot,nlh.PotBot,nlh.RandomBot,nlh.FoldBot,nlh.PairBot,nlh.TightBot]
     else:
         print "--game NLH|PLO"
         sys.exit(1)

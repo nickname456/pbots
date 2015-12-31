@@ -147,14 +147,15 @@ class ThinkingBot(Bot):
     def make_move(self, timeout):
         
         is_preflop = not 'table' in self.match_settings
-        pot = self.match_settings["maxWinPot"]
+        pot = int(self.match_settings["maxWinPot"])
+        call_amt = int(self.match_settings["amountToCall"])
         board = []
         if not is_preflop:
             board = self.parse_cards(self.match_settings['table'])
        
         assert self.on_button is not None
 
-        self.on_make_move(timeout,is_preflop,pot,board)
+        return self.on_make_move(timeout,is_preflop,pot,call_amt,board)
 
     # Subclasses implment
     def on_make_move(timeout,is_preflop,pot,board):
@@ -168,7 +169,7 @@ class PairBot(ThinkingBot):
         ThinkingBot.__init__(self)
 
 
-    def on_make_move(timeout,is_preflop,pot,board):
+    def on_make_move(self,timeout,is_preflop,pot,call_amt,board):
         
         if is_preflop:
 
@@ -179,19 +180,20 @@ class PairBot(ThinkingBot):
             
             if self.contains_pair(self.bots['me']['pocket'].cards):
                 if not self.has_raised_street:
-                    return "raise " + str(pot)
+                    return "raise %d" % pot
                 else:
-                    return "call " + (self.match_settings['amountToCall'])
+                    return "call %d" % call_amt
             elif average_card_value>8:
-                return "call " + (self.match_settings['amountToCall'])
+                return "call %d" % call_amt
             else:
                 return 'check 0' # might fold if there's a bet
         else:
-            if self.has_best_pair(self.bots['me']['pocket'].cards+board,self.bots['me']['pocket'].cards):
-                return "raise " + str(pot)
+            if self.has_best_pair(self.bots['me']['pocket'].cards+board, \
+                                    self.bots['me']['pocket'].cards):
+                return "raise %d " % pot
             elif self.has_pair_using_board(self.bots['me']['pocket'].cards+board,self.bots['me']['pocket'].cards):
                 # TODO: second pair not using board is ok too
-                return "call " + (self.match_settings['amountToCall'])
+                return "call %d" % call_amt
             return 'check 0' # might fold if there's a bet
 
 
@@ -226,11 +228,11 @@ class TightBot(ThinkingBot):
     def __init__(self):
         ThinkingBot.__init__(self)
 
-    def on_make_move(timeout,is_preflop,pot,board):
+    def on_make_move(self,timeout,is_preflop,pot,call_amt,board):
         
         if is_preflop:
 
-            hand = self.bots['me']['pocket']
+            hand = self.bots['me']['pocket'].cards
             values = '23456789TJQKA'
             a = hand[0].value
             b = hand[1].value
@@ -246,25 +248,42 @@ class TightBot(ThinkingBot):
                         should_open = hand_str in TightBot.unsuited_button
                     if should_open:
                         self.has_raised_street = True
-                        return "raise " + str(pot)
+                        # raises expressed in this protocol as amt above calling
+                        return "raise " + str(pot) # 2.5bb total
                     else:
-                        return "fold"
+                        return "fold 0"
                 else:
-                    # TODO: call reasonable raise?
-                    pass
+                    if call_amt*2<=pot:
+                        return "call %d" % call_amt
+                    else:
+                        return "fold 0"
             else:
-                button_raised = True # FIXME
+                button_raised = call_amt!=0
                 if button_raised:
-                    should_call = False
+                    hand_strong_enough = False
                     if is_suited:
-                        should_call = hand_str in TightBot.suited_cutoff
+                        hand_strong_enough = hand_str in TightBot.suited_cutoff
                     else:
-                        should_call = hand_str in TightBot.unsuited_cutoff
-                    # TODO: check raise size
+                        hand_strong_enough = hand_str in TightBot.unsuited_cutoff
+                    should_call = hand_strong_enough and call_amt*2<=pot
                     if should_call:
-                        return "call " + (self.match_settings['amountToCall'])
+                        return "call %d" % call_amt
                     else:
-                        return "fold"
+                        return "fold 0"
                 else:
-                    # TODO: raise OOP if button just called?
-                    pass
+                    hand_strong_enough = False
+                    if is_suited:
+                        hand_strong_enough = hand_str in TightBot.suited_cutoff
+                    else:
+                        hand_strong_enough = hand_str in TightBot.unsuited_cutoff
+                    if hand_strong_enough:
+                        return "raise " + str(pot) # 3bb total
+                    else:
+                        return "check 0"
+        else:
+            # FIXME!!
+            if call_amt!=0:
+                return "call %d" % call_amt
+            else:
+                return "check 0"
+        assert False
