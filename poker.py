@@ -21,6 +21,12 @@ class Card(object):
     def __repr__(self):
         return self.value+self.suit
 
+    def __cmp__(self,other):
+        n_cmp = cmp(self.number,other.number)
+        if n_cmp!=0:
+            return n_cmp
+        return cmp(self.suit,other.suit)
+
 class Pocket(object):
     '''
     Pocket class

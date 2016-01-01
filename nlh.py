@@ -228,16 +228,78 @@ class TightBot(ThinkingBot):
     def __init__(self):
         ThinkingBot.__init__(self)
 
+    def has_2nd_pair_or_better(self,board,hand):
+        board_ranks = list(set([c.number for c in board]))
+        board_ranks.sort()
+
+        h0,h1 = hand[0].number,hand[1].number
+
+        if h0==h1:
+            if len(board_ranks)>=2:
+                return h0 >= board_ranks[-2]
+            else:
+                return True
+        else:
+            b0 = board_ranks[-1]
+            if h0==b0 or h1==b0:
+                return True
+            if len(board_ranks)>=2:
+                b1 = board_ranks[-2]
+                if h0==b1 or h1==b1:
+                    return True
+            return False
+    
+    # for flop,turn,river
+    def all_5card_hands(cards):
+        if len(cards)==5:
+            yield Hand(cards)
+        elif len(cards)==6:
+            for i in range(0,6):
+                yield Hand(cards[0:i]+cards[(i+1):])
+        elif len(cards)==7:
+            for i in range(0,7):
+                for j in range(i+1,7):
+                yield Hand(cards[0:i]+cards[(i+1):j]+cards[(j+1):])
+
+    # has something better than a pair
+    def has_made_hand(self,board,hand):
+        return False # FIXME
+
+    def has_flush_draw(self,board,hand):
+        return False # FIXME
+
+    def has_straight_draw(self,board,hand):
+        return False # FIXME
+
     def on_make_move(self,timeout,is_preflop,pot,call_amt,board):
         
         if is_preflop:
-
+            return self.on_make_move_preflop(timeout,is_preflop,pot,call_amt,board)
+        else:
             hand = self.bots['me']['pocket'].cards
-            values = '23456789TJQKA'
-            a = hand[0].value
-            b = hand[1].value
-            hand_str = a+b if values.index(a)>values.index(b) else b+a
-            is_suited = hand[0].suit==hand[1].suit
+            # FIXME!!
+            # bet if we have second pair or better made
+            # call if we have a 4 card draw
+            # fold otherwise
+            if call_amt!=0:
+                return "call %d" % call_amt
+            else:
+                return "check 0"
+        assert False
+   
+   
+    # Ordered string representation for looking up in our tables
+    def unparse_hand(self)
+        hand = self.bots['me']['pocket'].cards
+        values = '23456789TJQKA'
+        a = hand[0].value
+        b = hand[1].value
+        hand_str = a+b if values.index(a)>values.index(b) else b+a
+        is_suited = hand[0].suit==hand[1].suit
+        return (hand_str,is_suited)
+
+    def on_make_move_preflop(self,timeout,is_preflop,pot,call_amt,board):
+            (hand_str,is_suited) = self.unparse_hand()
 
             if self.on_button:
                 if not self.has_raised_street:
@@ -280,10 +342,3 @@ class TightBot(ThinkingBot):
                         return "raise " + str(pot) # 3bb total
                     else:
                         return "check 0"
-        else:
-            # FIXME!!
-            if call_amt!=0:
-                return "call %d" % call_amt
-            else:
-                return "check 0"
-        assert False
