@@ -70,6 +70,14 @@ class Hand(object):
     def __repr__(self):
         return "Hand:"+str(self.cards)+" rank"+str(self.rank)
 
+    # TODO: cache the below?
+
+    def is_flush_draw(self):
+        return Ranker.is_flush_draw(self.cards)
+
+    def is_straight_draw(self):
+        return Ranker.is_flush_draw(self.cards)
+
 class Ranker(object):
     '''
     Ranker class
@@ -138,3 +146,37 @@ class Ranker(object):
             return ['1'] + kind_values
         # No pair
         return ['0'] + kind_values
+
+
+    @staticmethod
+    def is_flush_draw(cards):
+
+        for i in range(0,5):
+            cards_ = cards[0:i]+cards[(i+1):]
+            same_suit = all([c.suit == cards_[0].suit for c in cards_])
+            if same_suit:
+                return True
+        return False
+
+
+    @staticmethod
+    def is_straight_draw(cards):
+
+        # List of all card values
+        values = sorted(['23456789TJQKA'.find(card.value) for card in cards])
+
+        for i in range(0,5):
+            cards_ = cards[0:i]+cards[(i+1):]
+
+            assert False # copied logic from full hand, haven't fixed it up yet
+            sd = all([v[i] == values[0] + i for i in range(5)])
+
+            # Additional straight check
+            if not is_straight:
+
+                # Wheel
+                is_straight = all(values[i] == values[0] + i for i in range(4)) \
+                                and values[4] == 12 \
+                                and values[0] == 0
+
+

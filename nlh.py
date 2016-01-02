@@ -260,10 +260,16 @@ class TightBot(ThinkingBot):
             for i in range(0,7):
                 for j in range(i+1,7):
                 yield Hand(cards[0:i]+cards[(i+1):j]+cards[(j+1):])
+        else
+            print "not postflop?",cards
+            assert False
 
-    # has something better than a pair
-    def has_made_hand(self,board,hand):
-        return False # FIXME
+    def has_made_hand_better_than_pair(self,board,hand):
+        # not being smart enough to think about playing the board yet
+        for h in self.all_5card_hands(board+hand):
+            if h.rank[0]>='2':
+                return True
+        return False
 
     def has_flush_draw(self,board,hand):
         return False # FIXME
