@@ -321,7 +321,7 @@ class TightBot(ThinkingBot):
                     else:
                         return "fold 0"
                 else:
-                    if call_amt*2<=pot:
+                    if call_amt*2 <= pot:
                         return "call %d" % call_amt
                     else:
                         return "fold 0"
